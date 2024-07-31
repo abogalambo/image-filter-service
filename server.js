@@ -32,16 +32,23 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util.js';
     // validate image_url
     if (!image_url) {
       res.status(400).send('Missing required query parameter image_url')
+      return
     }
 
     // call filterImageFromURL(image_url) to filter the image
-    let filePath = await filterImageFromURL(image_url)
+    try{
+      let filePath = await filterImageFromURL(image_url)
 
-    // send the resulting file in the response
-    res.status(200).sendFile(filePath)
+      // send the resulting file in the response
+      res.status(200).sendFile(filePath)
 
-    // delete any files on the server on finish of the response
-    res.on('finish', () => deleteLocalFiles([filePath]))
+      // delete any files on the server on finish of the response
+      res.on('finish', () => deleteLocalFiles([filePath]))
+    } catch(err) {
+      console.log(`image_url is: ${image_url}`)
+      console.error(err);
+      res.status(422).send('Something went wrong! Please make sure the image is publicly accessible and is a valid image file')
+    }    
   } );
 
   //! END @TODO1
